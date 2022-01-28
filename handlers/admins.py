@@ -18,9 +18,7 @@ from config import que, admins as a
 async def update_admin(client, message):
     global a
     admins = await client.get_chat_members(message.chat.id, filter="administrators")
-    new_ads = []
-    for u in admins:
-        new_ads.append(u.user.id)
+    new_ads = [u.user.id for u in admins]
     a[message.chat.id] = new_ads
     await message.reply_text('Sucessfully updated admin list in **{}**'.format(message.chat.title))
 
@@ -105,5 +103,13 @@ async def skip(_, message: Message):
 )
 @errors
 async def admincache(client, message: Message):
-    set(message.chat.id, [member.user for member in await message.chat.get_members(filter="administrators")])
+    set(
+        message.chat.id,
+        (
+            member.user
+            for member in await message.chat.get_members(
+                filter="administrators"
+            )
+        ),
+    )
      #await message.reply_text("✯𝗩𝗖𝗣𝗹𝗮𝘆𝗕𝗼𝘁✯=❇️ Admin cache refreshed!")

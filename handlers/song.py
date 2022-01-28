@@ -24,13 +24,11 @@ from helpers.errors import DurationLimitError
 @Client.on_message(filters.command('song') & ~filters.channel)
 def song(client, message):
 
-    user_id = message.from_user.id 
-    user_name = message.from_user.first_name 
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
     rpk = "["+user_name+"](tg://user?id="+str(user_id)+")"
 
-    query = ''
-    for i in message.command[1:]:
-        query += ' ' + str(i)
+    query = ''.join(' ' + str(i) for i in message.command[1:])
     print(query)
     m = message.reply('🔎 Finding the song...')
     ydl_opts = {"format": "bestaudio[ext=m4a]"}
@@ -53,7 +51,7 @@ def song(client, message):
         m.edit(
             "❌ Found Nothing.\n\nTry another keywork or maybe spell it properly."
         )
-        print(str(e))
+        print(e)
         return
     m.edit("Downloading the song ")
     try:
@@ -84,12 +82,11 @@ def get_text(message: Message) -> [None, str]:
     text_to_return = message.text
     if message.text is None:
         return None
-    if " " in text_to_return:
-        try:
-            return message.text.split(None, 1)[1]
-        except IndexError:
-            return None
-    else:
+    if " " not in text_to_return:
+        return None
+    try:
+        return message.text.split(None, 1)[1]
+    except IndexError:
         return None
     
 
@@ -118,9 +115,10 @@ async def progress(current, total, message, start, type_of_ps, file_name=None):
         estimated_total_time = elapsed_time + time_to_completion
         progress_str = "{0}{1} {2}%\n".format(
             "".join(["█" for i in range(math.floor(percentage / 10))]),
-            "".join(["░" for i in range(10 - math.floor(percentage / 10))]),
+            "".join(["░" for _ in range(10 - math.floor(percentage / 10))]),
             round(percentage, 2),
         )
+
         tmp = progress_str + "{0} of {1}\nETA: {2}".format(
             humanbytes(current), humanbytes(total), time_formatter(estimated_total_time)
         )
@@ -143,15 +141,12 @@ async def progress(current, total, message, start, type_of_ps, file_name=None):
 
 
 def get_user(message: Message, text: str) -> [int, str, None]:
-    if text is None:
-        asplit = None
-    else:
-        asplit = text.split(" ", 1)
+    asplit = None if text is None else text.split(" ", 1)
     user_s = None
     reason_ = None
     if message.reply_to_message:
         user_s = message.reply_to_message.from_user.id
-        reason_ = text if text else None
+        reason_ = text or None
     elif asplit is None:
         return None, None
     elif len(asplit[0]) > 0:
@@ -169,10 +164,7 @@ def get_readable_time(seconds: int) -> int:
 
     while count < 4:
         count += 1
-        if count < 3:
-            remainder, result = divmod(seconds, 60)
-        else:
-            remainder, result = divmod(seconds, 24)
+        remainder, result = divmod(seconds, 60) if count < 3 else divmod(seconds, 24)
         if seconds == 0 and remainder == 0:
             break
         time_list.append(int(result))

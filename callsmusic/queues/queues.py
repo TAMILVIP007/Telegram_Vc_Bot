@@ -20,9 +20,7 @@ def get(chat_id: int) -> Union[Dict[str, str], None]:
 
 
 def is_empty(chat_id: int) -> bool:
-    if chat_id in queues:
-        return queues[chat_id].empty()
-    return True
+    return queues[chat_id].empty() if chat_id in queues else True
 
 
 def task_done(chat_id: int):
